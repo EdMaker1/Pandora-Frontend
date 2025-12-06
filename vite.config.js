@@ -13,19 +13,3 @@ export default defineConfig({
     }
   }
 })
-```
-
----
-
-## 📄 **4. .env.production (NUEVO)**
-
-**📁 Ubicación:** `~/proyectos_flask/Pandora/frontend/.env.production`
-
-Es decir, en la **raíz del frontend**, al mismo nivel que `package.json`:
-```
-frontend/
-├── .env.production          ← AQUÍ
-├── package.json
-├── vite.config.js
-├── index.html
-└── src/
