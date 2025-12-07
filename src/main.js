@@ -5,7 +5,7 @@ import App from './App.vue'
 
 // Importar vistas
 import Login from './views/Login.vue'
-import Home from './views/Home.vue'
+import Dashboard from './views/Dashboard.vue'  // ← Cambio: Home → Dashboard
 import Categorias from './views/Categorias.vue'
 import Productos from './views/Productos.vue'
 import Clientes from './views/Clientes.vue'
@@ -35,16 +35,19 @@ function hasAccess(allowedRoles) {
 const routes = [
   {
     path: '/login',
+    name: 'Login',
     component: Login,
     meta: { requiresAuth: false }
   },
   {
     path: '/',
-    component: Home,
+    name: 'Dashboard',  // ← Cambio: Home → Dashboard
+    component: Dashboard,  // ← Cambio: Home → Dashboard
     meta: { requiresAuth: true }
   },
   {
     path: '/categorias',
+    name: 'Categorias',
     component: Categorias,
     meta: { 
       requiresAuth: true,
@@ -53,6 +56,7 @@ const routes = [
   },
   {
     path: '/productos',
+    name: 'Productos',
     component: Productos,
     meta: { 
       requiresAuth: true,
@@ -61,6 +65,7 @@ const routes = [
   },
   {
     path: '/clientes',
+    name: 'Clientes',
     component: Clientes,
     meta: { 
       requiresAuth: true,
@@ -69,6 +74,7 @@ const routes = [
   },
   {
     path: '/ventas',
+    name: 'Ventas',
     component: Ventas,
     meta: { 
       requiresAuth: true,
@@ -77,6 +83,7 @@ const routes = [
   },
   {
     path: '/empleados',
+    name: 'Empleados',
     component: Empleados,
     meta: { 
       requiresAuth: true,
@@ -85,6 +92,7 @@ const routes = [
   },
   {
     path: '/pagos',
+    name: 'Pagos',
     component: Pagos,
     meta: { 
       requiresAuth: true,
@@ -93,6 +101,7 @@ const routes = [
   },
   {
     path: '/stock',
+    name: 'Stock',
     component: Stock,
     meta: { 
       requiresAuth: true,
@@ -101,11 +110,17 @@ const routes = [
   },
   {
     path: '/reportes',
+    name: 'Reportes',
     component: Reportes,
     meta: { 
       requiresAuth: true,
       allowedRoles: ['ADMINISTRADOR', 'SOPORTE', 'CAJERO']
     }
+  },
+  // Ruta catch-all para 404
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/login'
   }
 ]
 
