@@ -1,10 +1,20 @@
 import axios from 'axios'
 
-// Usar variable de entorno o fallback a proxy local
-const API_URL = import.meta.env.VITE_API_URL || '/api'
+// Construir la URL base correctamente
+const getBaseURL = () => {
+  const envURL = import.meta.env.VITE_API_URL
+  
+  if (envURL) {
+    // En producción, asegurar que termine con /api
+    return envURL.endsWith('/api') ? envURL : `${envURL}/api`
+  }
+  
+  // En desarrollo, usar proxy local
+  return '/api'
+}
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json'
   },
