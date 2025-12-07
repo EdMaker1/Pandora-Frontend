@@ -11,12 +11,60 @@
   <div v-else class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
     <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Librería Pandora</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">📚 Librería Pandora</h1>
         <p class="text-gray-600">Sistema de Gestión</p>
       </div>
 
-      <!-- Mensajes de error -->
-      <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+      <!-- Mensaje de error elegante para usuario no autorizado -->
+      <div v-if="errorType === 'no_account'" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <h3 class="text-red-800 font-semibold mb-1">Usuario No Autorizado</h3>
+            <p class="text-red-700 text-sm mb-2">
+              El correo <strong class="font-mono">{{ errorEmail }}</strong> no está registrado en el sistema.
+            </p>
+            <p class="text-red-600 text-sm">
+              Por favor, contacte al administrador de Pandora para solicitar acceso.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuenta desactivada -->
+      <div v-else-if="errorType === 'account_disabled'" class="mb-6 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-orange-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <h3 class="text-orange-800 font-semibold mb-1">Cuenta Desactivada</h3>
+            <p class="text-orange-700 text-sm">
+              Su cuenta ha sido desactivada. Por favor, contacte al administrador de Pandora.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error de autenticación -->
+      <div v-else-if="errorType === 'auth_failed'" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <h3 class="text-red-800 font-semibold mb-1">Error de Autenticación</h3>
+            <p class="text-red-700 text-sm">
+              Ocurrió un error al autenticar con Google. Por favor, intente nuevamente.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error genérico de login tradicional -->
+      <div v-else-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
         {{ errorMessage }}
       </div>
 
@@ -93,22 +141,25 @@ export default {
         password: ''
       },
       errorMessage: '',
+      errorType: null,
+      errorEmail: '',
       checking: true
     }
   },
   async mounted() {
     await this.checkIfAlreadyAuthenticated()
     
+    // Capturar parámetros de error de la URL
     const urlParams = new URLSearchParams(window.location.search)
     const error = urlParams.get('error')
     const email = urlParams.get('email')
     
-    if (error === 'no_account') {
-      this.errorMessage = `No existe una cuenta vinculada a ${email}. Contacta al administrador.`
-    } else if (error === 'account_disabled') {
-      this.errorMessage = 'Tu cuenta está desactivada. Contacta al administrador.'
-    } else if (error === 'auth_failed') {
-      this.errorMessage = 'Error al autenticar con Google. Intenta nuevamente.'
+    this.errorType = error
+    this.errorEmail = email || ''
+    
+    // Limpiar URL sin recargar la página
+    if (error) {
+      window.history.replaceState({}, document.title, '/login')
     }
   },
   methods: {
@@ -127,6 +178,7 @@ export default {
     },
     async handleLogin() {
       this.errorMessage = ''
+      this.errorType = null
       try {
         const response = await api.auth.login(this.credentials)
         localStorage.setItem('user', JSON.stringify(response.data.user))
